@@ -68,3 +68,12 @@ def find_cycles(graph):
             path.append(child)
             stack.append(iter(graph.edges[child]))
     return cycles
+
+
+def reverse_edges(edges):
+    """Развернуть рёбра: для каждого пакета — кто от него зависит."""
+    reverse = {node: [] for node in edges}
+    for node, children in edges.items():
+        for child in children:
+            reverse.setdefault(child, []).append(node)
+    return reverse

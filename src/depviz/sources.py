@@ -8,6 +8,7 @@ import re
 
 from depviz.cargo import CargoRegistry, RegistryError
 from depviz.errors import DepVizError
+from depviz.graph import reverse_edges
 from depviz.semver import VersionError, matches, parse_requirement, \
     parse_version
 
@@ -66,13 +67,19 @@ class FileSource:
 
     def root(self, name, _version):
         """Корень графа; версия в тестовом режиме не используется."""
-        if name not in self.graph:
+        known = set(self.graph).union(*self.graph.values())
+        if name not in known:
             raise TestRepoError(f"package {name} not found in test repository")
         return name
 
     def dependencies(self, node):
         """Прямые зависимости пакета."""
         return unique(self.graph.get(node, []))
+
+    def reverse_source(self):
+        """Функция «кто зависит от пакета» для обратного обхода."""
+        reverse = reverse_edges(self.graph)
+        return lambda node: unique(reverse.get(node, []))
 
     @staticmethod
     def label(node):
@@ -114,6 +121,12 @@ class RegistrySource:
             except (RegistryError, VersionError) as exc:
                 self.warnings.append(f"{self.label(node)}: {exc}")
         return unique(result)
+
+    @staticmethod
+    def reverse_source():
+        """Обратные зависимости в реестре Cargo не поддерживаются."""
+        raise DepVizError(
+            "mode = reverse needs a test repository (test_mode = true)")
 
     @staticmethod
     def label(node):

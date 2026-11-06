@@ -8,6 +8,8 @@ from depviz.errors import ConfigError
 
 SECTION = "depviz"
 KEYS = ("package", "repository", "test_mode", "version", "max_depth")
+OPTIONAL = {"mode": "graph"}
+MODES = ("graph", "reverse")
 MIN_DEPTH = 1
 CRATE_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
 TEST_NAME = re.compile(r"^[A-Z]+$")
@@ -26,10 +28,12 @@ class Config:
     test_mode: bool
     version: str
     max_depth: int
+    mode: str = OPTIONAL["mode"]
 
     def items(self):
         """Вернуть пары (ключ, значение) в порядке объявления."""
-        return [(key, getattr(self, key)) for key in KEYS]
+        return [(key, getattr(self, key))
+                for key in KEYS + tuple(OPTIONAL)]
 
 
 def read_section(path):
@@ -45,13 +49,16 @@ def read_section(path):
     if not parser.has_section(SECTION):
         raise ConfigError(f"missing section [{SECTION}]")
     section = parser[SECTION]
-    unknown = sorted(set(section) - set(KEYS))
+    unknown = sorted(set(section) - set(KEYS) - set(OPTIONAL))
     if unknown:
         raise ConfigError(f"unknown parameter: {unknown[0]}")
     for key in KEYS:
         if not section.get(key, "").strip():
             raise ConfigError(f"missing parameter: {key}")
-    return {key: section[key].strip() for key in KEYS}
+    values = {key: section[key].strip() for key in KEYS}
+    for key, default in OPTIONAL.items():
+        values[key] = section.get(key, "").strip() or default
+    return values
 
 
 def parse_bool(value):
@@ -107,6 +114,14 @@ def check_version(value):
     return value
 
 
+def check_mode(value):
+    """Проверить режим вывода."""
+    if value not in MODES:
+        raise ConfigError(
+            f"mode: expected one of {', '.join(MODES)}, got '{value}'")
+    return value
+
+
 def load_config(path):
     """Прочитать файл, проверить все параметры и вернуть Config."""
     raw = read_section(path)
@@ -118,4 +133,5 @@ def load_config(path):
         test_mode=test_mode,
         version=check_version(raw["version"]),
         max_depth=parse_depth(raw["max_depth"]),
+        mode=check_mode(raw["mode"]),
     )
