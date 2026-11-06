@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+# Сборка и результаты
+build/
+dist/
+*.egg-info/
+out/
+*.html
+*.mmd
+*.png
+*.svg
+# Архивы
+*.zip
+*.tar.gz
+# Редакторы и ОС
+.vscode/
+.idea/
+*.swp
+.DS_Store
