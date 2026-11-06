@@ -1,13 +1,9 @@
 """Тесты этапа 2: чтение индекса Cargo и прямые зависимости."""
-import io
 import json
 import unittest
-from contextlib import redirect_stdout
 
-from depviz.__main__ import print_direct
 from depviz.cargo import (CargoRegistry, NotFoundError, RegistryError,
                           index_path)
-from depviz.config import Config
 
 
 def line(name, vers, deps=(), yanked=False):
@@ -94,17 +90,6 @@ class RegistryTest(unittest.TestCase):
         registry.releases("app")
         registry.releases("app")
         self.assertEqual(len(calls), 1)
-
-    def test_print_direct(self):
-        """Вывод на экран всех прямых зависимостей."""
-        config = Config("app", "https://example.org", False, "2.0.0", 1)
-        out = io.StringIO()
-        with redirect_stdout(out):
-            print_direct(config, self.registry)
-        text = out.getvalue()
-        self.assertIn("app 2.0.0: direct dependencies (3)", text)
-        self.assertIn("liby ~0.3 [build]", text)
-        self.assertIn("skipped dev/optional dependencies: 2", text)
 
 
 if __name__ == "__main__":

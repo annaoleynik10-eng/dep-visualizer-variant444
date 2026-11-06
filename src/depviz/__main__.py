@@ -2,9 +2,10 @@
 import argparse
 import sys
 
-from depviz.cargo import CargoRegistry
 from depviz.config import load_config
 from depviz.errors import DepVizError
+from depviz.graph import build_graph, find_cycles
+from depviz.sources import make_source
 
 DEFAULT_CONFIG = "config.ini"
 
@@ -19,31 +20,38 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-def describe(dep):
-    """Строка для вывода одной зависимости."""
-    extra = f" [{dep.kind}]" if dep.kind != "normal" else ""
-    target = f" (target: {dep.target})" if dep.target else ""
-    return f"  {dep.name} {dep.req}{extra}{target}"
+def print_graph(graph, label, max_depth):
+    """Вывести граф: вершины в порядке BFS и их зависимости."""
+    print(f"dependency graph of {label(graph.root)} "
+          f"(max_depth = {max_depth})")
+    print(f"packages: {len(graph.edges)}, edges: {graph.edge_count()}")
+    for node, children in graph.edges.items():
+        text = ", ".join(label(child) for child in children)
+        if node in graph.cut:
+            text = "... (max depth reached)"
+        arrow = f" -> {text}" if text else ""
+        print(f"  [{graph.depth[node]}] {label(node)}{arrow}")
 
 
-def print_direct(config, registry):
-    """Вывести прямые зависимости пакета заданной версии."""
-    deps = registry.dependencies(config.package, config.version)
-    used = [dep for dep in deps if dep.is_used()]
-    print(f"{config.package} {config.version}: "
-          f"direct dependencies ({len(used)})")
-    for dep in used:
-        print(describe(dep))
-    skipped = len(deps) - len(used)
-    if skipped:
-        print(f"skipped dev/optional dependencies: {skipped}")
+def print_cycles(cycles, label):
+    """Вывести найденные циклические зависимости."""
+    if not cycles:
+        print("cycles: none")
+        return
+    print(f"cycles: {len(cycles)}")
+    for cycle in cycles:
+        print("  " + " -> ".join(label(node) for node in cycle))
 
 
 def run(config):
-    """Выполнить работу приложения согласно конфигурации."""
-    if config.test_mode:
-        raise DepVizError("test repository mode is not implemented yet")
-    print_direct(config, CargoRegistry(config.repository))
+    """Построить граф зависимостей и вывести его."""
+    source = make_source(config)
+    root = source.root(config.package, config.version)
+    graph = build_graph(root, source.dependencies, config.max_depth)
+    print_graph(graph, source.label, config.max_depth)
+    print_cycles(find_cycles(graph), source.label)
+    for warning in source.warnings:
+        print(f"warning: {warning}", file=sys.stderr)
 
 
 def main(argv=None):

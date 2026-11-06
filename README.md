@@ -10,7 +10,7 @@
 стандартная библиотека Python, готовые менеджеры пакетов и библиотеки
 для получения зависимостей не используются.
 
-Текущий этап: **2 — сбор данных**.
+Текущий этап: **3 — основные операции** (граф с учётом транзитивности).
 
 ## Откуда берутся зависимости
 
@@ -24,6 +24,43 @@
 Зависимости `dev` (нужны только для тестов самого пакета) и `optional`
 (включаются только через features) пропускаются, их число выводится
 отдельной строкой.
+
+## Построение графа
+
+Граф строится алгоритмом обхода в ширину (BFS) без рекурсии
+(`graph.build_graph`): очередь `collections.deque`, словарь глубин служит
+множеством посещённых вершин. Каждая вершина раскрывается один раз,
+поэтому циклические зависимости не приводят к зацикливанию. Вершины
+на глубине `max_depth` не раскрываются (помечаются
+`... (max depth reached)`).
+
+Для зависимости из индекса известна не версия, а требование (`^1.0`,
+`~0.3`, `>=1, <2`). Как и Cargo, программа выбирает **старшую
+невыдернутую (not yanked) версию**, подходящую под требование
+(`semver.py`, `RegistrySource.resolve`). Вершина графа — пара
+«имя версия».
+
+Циклы ищутся обходом в глубину на явном стеке (`graph.find_cycles`):
+ребро в вершину, которая сейчас на пути от корня, замыкает цикл.
+
+### Тестовый режим
+
+При `test_mode = true` в `repository` указывается путь к файлу описания
+графа. Пакеты называются большими латинскими буквами, формат строки —
+`ПАКЕТ: ЗАВИСИМОСТИ`, `#` — комментарий:
+
+```
+# tests/repos/cycle.txt
+A: B
+B: C
+C: A D
+D:
+```
+
+Тестовые репозитории в `tests/repos`: `simple` (общая зависимость),
+`chain` (цепочка для проверки глубины), `cycle` (цикл), `self`
+(зависимость от себя), `complex` (два цикла, неописанный лист K),
+`bad_format`, `bad_name` (ошибки формата).
 
 ## Настройки (файл INI)
 
@@ -53,7 +90,9 @@
 - `test_mode` не `true`/`false`;
 - версия не в формате `MAJOR.MINOR.PATCH`;
 - `max_depth` не число или меньше 1;
-- пакета или версии нет в репозитории, репозиторий недоступен.
+- пакета или версии нет в репозитории, репозиторий недоступен;
+- ошибка формата файла тестового репозитория (с номером строки),
+  корневого пакета нет в тестовом репозитории.
 
 ## Функции
 
@@ -68,7 +107,13 @@
 | `cargo.py` | `CargoRegistry.releases` | все версии пакета (с кэшем) |
 | `cargo.py` | `CargoRegistry.release` | описание заданной версии |
 | `cargo.py` | `CargoRegistry.direct_dependencies` | прямые зависимости версии |
-| `__main__.py` | `print_direct` | вывести прямые зависимости |
+| `semver.py` | `parse_version`, `parse_requirement`, `matches` | версии и требования Cargo |
+| `sources.py` | `FileSource` | тестовый репозиторий из файла |
+| `sources.py` | `RegistrySource.resolve` | выбрать версию под требование |
+| `sources.py` | `make_source` | выбрать источник по `test_mode` |
+| `graph.py` | `build_graph` | BFS без рекурсии с ограничением глубины |
+| `graph.py` | `find_cycles` | найти циклы |
+| `__main__.py` | `print_graph`, `print_cycles` | вывести граф и циклы |
 | `__main__.py` | `main` | точка входа, вывод ошибок и код выхода |
 
 ## Сборка и запуск
@@ -79,19 +124,34 @@
 ./run.sh configs/serde_json.ini      # запуск с конфигурацией
 ./tests/sh/stage1.sh                 # ошибки конфигурации (этап 1)
 ./tests/sh/stage2.sh                 # прямые зависимости и ошибки (этап 2)
+./tests/sh/stage3.sh                 # граф, глубина, циклы (этап 3)
 PYTHONPATH=src python3 -m unittest discover -s tests -t .   # тесты
 ```
 
 ## Примеры использования
 
 ```
+$ ./run.sh configs/test_cycle.ini
+dependency graph of A (max_depth = 10)
+packages: 4, edges: 4
+  [0] A -> B
+  [1] B -> C
+  [2] C -> A, D
+  [3] D
+cycles: 1
+  A -> B -> C -> A
+
 $ ./run.sh configs/serde_json.ini
-serde_json 1.0.128: direct dependencies (4)
-  itoa ^1.0
-  memchr ^2
-  ryu ^1.0
-  serde ^1.0.194
-skipped dev/optional dependencies: 10
+dependency graph of serde_json 1.0.128 (max_depth = 3)
+packages: 7, edges: 6
+  [0] serde_json 1.0.128 -> itoa 1.0.18, memchr 2.8.3, ryu 1.0.23, serde 1.0.229
+  [1] itoa 1.0.18
+  [1] memchr 2.8.3
+  [1] ryu 1.0.23
+  [1] serde 1.0.229 -> serde_core 1.0.229
+  [2] serde_core 1.0.229 -> serde_derive 1.0.229
+  [3] serde_derive 1.0.229 -> ... (max depth reached)
+cycles: none
 
 $ ./run.sh tests/configs/unknown_version.ini
 error: version 9.9.9 of serde_json not found
