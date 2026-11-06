@@ -2,7 +2,7 @@
 import io
 import os
 import unittest
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import redirect_stderr
 
 from depviz.__main__ import main
 from depviz.config import load_config
@@ -66,15 +66,6 @@ class LoadConfigTest(unittest.TestCase):
 
 class MainTest(unittest.TestCase):
     """Проверка вывода приложения."""
-
-    def test_prints_key_value(self):
-        """Параметры выводятся в формате ключ = значение."""
-        out = io.StringIO()
-        with redirect_stdout(out):
-            code = main([os.path.join(ROOT, "configs", "serde_json.ini")])
-        self.assertEqual(code, 0)
-        self.assertIn("package = serde_json", out.getvalue())
-        self.assertIn("test_mode = false", out.getvalue())
 
     def test_error_exit_code(self):
         """При ошибке — сообщение в stderr и код выхода 1."""

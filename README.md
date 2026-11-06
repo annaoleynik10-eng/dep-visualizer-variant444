@@ -10,7 +10,20 @@
 стандартная библиотека Python, готовые менеджеры пакетов и библиотеки
 для получения зависимостей не используются.
 
-Текущий этап: **1 — минимальный прототип с конфигурацией**.
+Текущий этап: **2 — сбор данных**.
+
+## Откуда берутся зависимости
+
+Источник данных — индекс реестра Cargo (по умолчанию `https://index.crates.io`).
+Для каждого пакета в индексе есть текстовый файл, где каждая строка — JSON
+с описанием одной версии и её зависимостей. Путь к файлу зависит от длины
+имени: `1/a`, `2/ab`, `3/a/abc`, `se/rd/serde`. Файл скачивается модулем
+`urllib`, строки разбираются модулем `json`.
+
+Прямыми зависимостями считаются зависимости видов `normal` и `build`.
+Зависимости `dev` (нужны только для тестов самого пакета) и `optional`
+(включаются только через features) пропускаются, их число выводится
+отдельной строкой.
 
 ## Настройки (файл INI)
 
@@ -39,7 +52,8 @@
   репозитория не найден;
 - `test_mode` не `true`/`false`;
 - версия не в формате `MAJOR.MINOR.PATCH`;
-- `max_depth` не число или меньше 1.
+- `max_depth` не число или меньше 1;
+- пакета или версии нет в репозитории, репозиторий недоступен.
 
 ## Функции
 
@@ -49,6 +63,12 @@
 | `config.py` | `read_section` | прочитать секцию `[depviz]` |
 | `config.py` | `parse_bool`, `parse_depth` | преобразовать `test_mode`, `max_depth` |
 | `config.py` | `check_package`, `check_repository`, `check_version` | проверить значения |
+| `cargo.py` | `index_path` | путь к файлу пакета в индексе |
+| `cargo.py` | `download` | скачать файл по URL (`urllib`) |
+| `cargo.py` | `CargoRegistry.releases` | все версии пакета (с кэшем) |
+| `cargo.py` | `CargoRegistry.release` | описание заданной версии |
+| `cargo.py` | `CargoRegistry.direct_dependencies` | прямые зависимости версии |
+| `__main__.py` | `print_direct` | вывести прямые зависимости |
 | `__main__.py` | `main` | точка входа, вывод ошибок и код выхода |
 
 ## Сборка и запуск
@@ -57,7 +77,8 @@
 
 ```sh
 ./run.sh configs/serde_json.ini      # запуск с конфигурацией
-./tests/sh/stage1.sh                 # демонстрация всех ошибок этапа 1
+./tests/sh/stage1.sh                 # ошибки конфигурации (этап 1)
+./tests/sh/stage2.sh                 # прямые зависимости и ошибки (этап 2)
 PYTHONPATH=src python3 -m unittest discover -s tests -t .   # тесты
 ```
 
@@ -65,11 +86,15 @@ PYTHONPATH=src python3 -m unittest discover -s tests -t .   # тесты
 
 ```
 $ ./run.sh configs/serde_json.ini
-package = serde_json
-repository = https://index.crates.io
-test_mode = false
-version = 1.0.128
-max_depth = 3
+serde_json 1.0.128: direct dependencies (4)
+  itoa ^1.0
+  memchr ^2
+  ryu ^1.0
+  serde ^1.0.194
+skipped dev/optional dependencies: 10
+
+$ ./run.sh tests/configs/unknown_version.ini
+error: version 9.9.9 of serde_json not found
 
 $ ./run.sh tests/configs/bad_depth_zero.ini
 error: max_depth: must be >= 1, got 0

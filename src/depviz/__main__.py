@@ -2,6 +2,7 @@
 import argparse
 import sys
 
+from depviz.cargo import CargoRegistry
 from depviz.config import load_config
 from depviz.errors import DepVizError
 
@@ -18,17 +19,31 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-def format_value(value):
-    """Показать значение параметра так, как оно пишется в INI."""
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    return str(value)
+def describe(dep):
+    """Строка для вывода одной зависимости."""
+    extra = f" [{dep.kind}]" if dep.kind != "normal" else ""
+    target = f" (target: {dep.target})" if dep.target else ""
+    return f"  {dep.name} {dep.req}{extra}{target}"
+
+
+def print_direct(config, registry):
+    """Вывести прямые зависимости пакета заданной версии."""
+    deps = registry.dependencies(config.package, config.version)
+    used = [dep for dep in deps if dep.is_used()]
+    print(f"{config.package} {config.version}: "
+          f"direct dependencies ({len(used)})")
+    for dep in used:
+        print(describe(dep))
+    skipped = len(deps) - len(used)
+    if skipped:
+        print(f"skipped dev/optional dependencies: {skipped}")
 
 
 def run(config):
-    """Выполнить работу приложения: вывести параметры ключ = значение."""
-    for key, value in config.items():
-        print(f"{key} = {format_value(value)}")
+    """Выполнить работу приложения согласно конфигурации."""
+    if config.test_mode:
+        raise DepVizError("test repository mode is not implemented yet")
+    print_direct(config, CargoRegistry(config.repository))
 
 
 def main(argv=None):
