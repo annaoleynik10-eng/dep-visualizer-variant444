@@ -20,3 +20,6 @@ out/
 .idea/
 *.swp
 .DS_Store
+
+# Примеры картинок графа для README
+!docs/images/*.svg

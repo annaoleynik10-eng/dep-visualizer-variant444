@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="271" height="526" viewBox="0 0 271 526">
+<style>text{font-family:sans-serif;font-size:15px}.e{stroke:#8a93a6;stroke-width:1.6;fill:none}.b{stroke:#d64545;stroke-width:1.6;fill:none}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="#8a93a6"/></marker><marker id="r" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="#d64545"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<line x1="136" y1="84" x2="58" y2="174" class="e" marker-end="url(#a)"/>
+<line x1="136" y1="84" x2="136" y2="174" class="e" marker-end="url(#a)"/>
+<line x1="136" y1="84" x2="212" y2="174" class="e" marker-end="url(#a)"/>
+<path d="M58,218 C58,268 136,268 136,218" class="e" marker-end="url(#a)"/>
+<line x1="58" y1="218" x2="58" y2="308" class="e" marker-end="url(#a)"/>
+<line x1="136" y1="218" x2="136" y2="308" class="b" marker-end="url(#r)"/>
+<path d="M136,218 C136,268 212,268 212,218" class="e" marker-end="url(#a)"/>
+<line x1="212" y1="218" x2="136" y2="308" class="e" marker-end="url(#a)"/>
+<line x1="212" y1="218" x2="212" y2="308" class="e" marker-end="url(#a)"/>
+<path d="M58,352 C58,402 136,402 136,352" class="e" marker-end="url(#a)"/>
+<line x1="58" y1="352" x2="97" y2="442" class="b" marker-end="url(#r)"/>
+<line x1="136" y1="352" x2="174" y2="442" class="b" marker-end="url(#r)"/>
+<path d="M97,442 C97,374 58,420 58,352" class="b" marker-end="url(#r)"/>
+<path d="M174,442 C174,374 136,286 136,218" class="b" marker-end="url(#r)"/>
+<rect x="117" y="40" width="37" height="44" rx="10" fill="#ffe9a8" stroke="#6b6fd6"/><text x="136" y="67" text-anchor="middle">A</text>
+<rect x="40" y="174" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="58" y="201" text-anchor="middle">B</text>
+<rect x="117" y="174" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="136" y="201" text-anchor="middle">C</text>
+<rect x="194" y="174" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="212" y="201" text-anchor="middle">D</text>
+<rect x="40" y="308" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="58" y="335" text-anchor="middle">E</text>
+<rect x="117" y="308" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="136" y="335" text-anchor="middle">F</text>
+<rect x="194" y="308" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="212" y="335" text-anchor="middle">K</text>
+<rect x="78" y="442" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="97" y="469" text-anchor="middle">G</text>
+<rect x="156" y="442" width="37" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="174" y="469" text-anchor="middle">H</text>
+</svg>

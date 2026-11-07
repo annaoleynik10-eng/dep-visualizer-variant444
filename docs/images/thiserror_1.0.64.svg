@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="622" height="526" viewBox="0 0 622 526">
+<style>text{font-family:sans-serif;font-size:15px}.e{stroke:#8a93a6;stroke-width:1.6;fill:none}.b{stroke:#d64545;stroke-width:1.6;fill:none}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="#8a93a6"/></marker><marker id="r" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="#d64545"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<line x1="311" y1="84" x2="311" y2="174" class="e" marker-end="url(#a)"/>
+<line x1="311" y1="218" x2="140" y2="308" class="e" marker-end="url(#a)"/>
+<line x1="311" y1="218" x2="347" y2="308" class="e" marker-end="url(#a)"/>
+<line x1="311" y1="218" x2="518" y2="308" class="e" marker-end="url(#a)"/>
+<line x1="140" y1="352" x2="311" y2="442" class="e" marker-end="url(#a)"/>
+<path d="M347,352 C347,402 140,402 140,352" class="e" marker-end="url(#a)"/>
+<path d="M518,352 C518,402 140,402 140,352" class="e" marker-end="url(#a)"/>
+<line x1="518" y1="352" x2="311" y2="442" class="e" marker-end="url(#a)"/>
+<rect x="225" y="40" width="172" height="44" rx="10" fill="#ffe9a8" stroke="#6b6fd6"/><text x="311" y="67" text-anchor="middle">thiserror 1.0.64</text>
+<rect x="202" y="174" width="217" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="311" y="201" text-anchor="middle">thiserror-impl 1.0.64</text>
+<rect x="40" y="308" width="199" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="140" y="335" text-anchor="middle">proc-macro2 1.0.107</text>
+<rect x="279" y="308" width="136" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="347" y="335" text-anchor="middle">quote 1.0.47</text>
+<rect x="455" y="308" width="127" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="518" y="335" text-anchor="middle">syn 2.0.119</text>
+<rect x="207" y="442" width="208" height="44" rx="10" fill="#eef0ff" stroke="#6b6fd6"/><text x="311" y="469" text-anchor="middle">unicode-ident 1.0.27</text>
+</svg>
